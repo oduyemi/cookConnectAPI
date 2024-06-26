@@ -23,9 +23,10 @@ const createRecipe = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             return res.status(400).json({ message: "All fields are required" });
         }
         const cloudinaryResponse = yield cloudinary_1.v2.uploader.upload(img, {
-            folder: "recipe-images/",
+            folder: "cookconnect/recipe-images/",
             width: 300,
-            crop: "scale"
+            crop: "scale",
+            public_id: title.replace(/\s+/g, '_').toLowerCase()
         });
         const newRecipeData = {
             title,
