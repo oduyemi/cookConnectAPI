@@ -14,6 +14,7 @@ import registerRoutes from "./routes/registerRoutes";
 import userRoutes from './routes/userRoutes';
 import otpRoutes from './routes/otpRoutes';
 import recipeRoutes from "./routes/recipeRoutes";
+import { v2 as cloudinary } from "cloudinary";
 
 dotenv.config();
 
@@ -70,6 +71,12 @@ app.use("/api/v1", createProxyMiddleware({
   target: "http://192.168.43.113:3000/",
   changeOrigin: true,
 }));
+
+cloudinary.config({
+  secure: true,
+});
+
+console.log(cloudinary.config());
 
 const PORT: number | string = process.env.PORT || 3000;
 app.listen(PORT, () => {
