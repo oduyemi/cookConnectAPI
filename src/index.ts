@@ -16,13 +16,6 @@ import otpRoutes from './routes/otpRoutes';
 import recipeRoutes from "./routes/recipeRoutes";
 import { v2 as cloudinary } from "cloudinary";
 
-dotenv.config();
-
-
-
-
-
-
 
 dotenv.config();
 
@@ -55,8 +48,6 @@ app.use('/api/v1/', userRoutes);
 app.use('/api/v1/users/likes', likeRoutes);
 app.use('/api/v1/recipe', recipeRoutes);
 app.use('/api/v1/recipe/comments', userRoutes);
-
-
 
 
 // GET route for the API "/"

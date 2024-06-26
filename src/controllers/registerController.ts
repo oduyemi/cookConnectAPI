@@ -11,25 +11,6 @@ const router = express.Router();
 require("dotenv").config();
 
 
-// interface UserSession {
-//     userID: mongoose.Types.ObjectId; 
-//     firstName: string;
-//     lastName: string;
-//     email: string;
-//     username: string;
-//     bio?: string;
-//     img?: string;
-// }
-  
-
-// declare module "express-session" {
-//     interface SessionData {
-//         user?: UserSession; 
-
-//     }
-// }
-
-
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 

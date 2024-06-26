@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { Types } from "mongoose";
 import Recipe, { IRecipe } from '../models/recipe';
+import { v2 as cloudinary } from 'cloudinary';
+
 
 export const createRecipe = async (req: Request, res: Response) => {
     try {
@@ -9,10 +11,26 @@ export const createRecipe = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        const newRecipe = new Recipe({ title, desc, ingredients, instructions, author, img });
-        await newRecipe.save();
+        const cloudinaryResponse = await cloudinary.uploader.upload(img, {
+            folder: "recipe-images/",
+            width: 300,
+            crop: "scale"
+        });
 
-        return res.status(201).json({ message: "Recipe created successfully" });
+        const newRecipeData: Partial<IRecipe> = {
+            title,
+            desc,
+            ingredients,
+            instructions,
+            author,
+            img: cloudinaryResponse.secure_url,
+            createdAt: new Date(),
+        };
+
+        const newRecipe = new Recipe(newRecipeData);
+        const savedRecipe = await newRecipe.save();
+        return res.status(201).json({ message: "Recipe created successfully", data: savedRecipe });
+        
     } catch (error) {
         console.error("Error during recipe creation:", error);
         return res.status(500).json({ message: "Error creating recipe" });

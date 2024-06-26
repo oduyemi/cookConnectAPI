@@ -8,9 +8,9 @@ export interface IRecipe extends Document {
     instructions: string;
     img?: string;
     author: mongoose.Types.ObjectId;
-    likesCount: number;
-    createdAt: Date;
-    updatedAt: Date;
+    likesCount?: number;
+    createdAt: Date | null;
+    updatedAt?: Date;
 }
 
 const recipeSchema: Schema<IRecipe> = new Schema({
