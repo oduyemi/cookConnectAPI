@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import bcrypt, { hash, compare } from "bcrypt";
 import crypto from "crypto";
-import mongoose from "mongoose";
 import User, { IUser } from "../models/user";
 
 const router = express.Router();

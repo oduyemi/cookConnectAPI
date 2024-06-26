@@ -16,7 +16,7 @@ const registerRoutes_1 = __importDefault(require("./routes/registerRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const otpRoutes_1 = __importDefault(require("./routes/otpRoutes"));
 const recipeRoutes_1 = __importDefault(require("./routes/recipeRoutes"));
-dotenv_1.default.config();
+const cloudinary_1 = require("cloudinary");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const session = require('express-session');
@@ -50,6 +50,10 @@ app.use("/api/v1", (0, http_proxy_middleware_1.createProxyMiddleware)({
     target: "http://192.168.43.113:3000/",
     changeOrigin: true,
 }));
+cloudinary_1.v2.config({
+    secure: true,
+});
+console.log(cloudinary_1.v2.config());
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);

@@ -21,20 +21,6 @@ const crypto_1 = __importDefault(require("crypto"));
 const user_1 = __importDefault(require("../models/user"));
 const router = express_1.default.Router();
 require("dotenv").config();
-// interface UserSession {
-//     userID: mongoose.Types.ObjectId; 
-//     firstName: string;
-//     lastName: string;
-//     email: string;
-//     username: string;
-//     bio?: string;
-//     img?: string;
-// }
-// declare module "express-session" {
-//     interface SessionData {
-//         user?: UserSession; 
-//     }
-// }
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 if (!SMTP_USER || !SMTP_PASS) {

@@ -15,15 +15,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRecipe = exports.updateRecipe = exports.getRecipeById = exports.getAllRecipe = exports.createRecipe = void 0;
 const mongoose_1 = require("mongoose");
 const recipe_1 = __importDefault(require("../models/recipe"));
+const cloudinary_1 = require("cloudinary");
 const createRecipe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { title, desc, ingredients, instructions, author, img } = req.body;
         if (![title, desc, ingredients, instructions, author, img].every(field => field)) {
             return res.status(400).json({ message: "All fields are required" });
         }
-        const newRecipe = new recipe_1.default({ title, desc, ingredients, instructions, author, img });
-        yield newRecipe.save();
-        return res.status(201).json({ message: "Recipe created successfully" });
+        const cloudinaryResponse = yield cloudinary_1.v2.uploader.upload(img, {
+            folder: "recipe-images/",
+            width: 300,
+            crop: "scale"
+        });
+        const newRecipeData = {
+            title,
+            desc,
+            ingredients,
+            instructions,
+            author,
+            img: cloudinaryResponse.secure_url,
+            createdAt: new Date(),
+        };
+        const newRecipe = new recipe_1.default(newRecipeData);
+        const savedRecipe = yield newRecipe.save();
+        return res.status(201).json({ message: "Recipe created successfully", data: savedRecipe });
     }
     catch (error) {
         console.error("Error during recipe creation:", error);

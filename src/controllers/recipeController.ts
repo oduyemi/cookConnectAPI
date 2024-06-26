@@ -12,10 +12,12 @@ export const createRecipe = async (req: Request, res: Response) => {
         }
 
         const cloudinaryResponse = await cloudinary.uploader.upload(img, {
-            folder: "recipe-images/",
+            folder: "cookconnect/recipe-images/",
             width: 300,
-            crop: "scale"
+            crop: "scale",
+            public_id: title.replace(/\s+/g, '_').toLowerCase()
         });
+        
 
         const newRecipeData: Partial<IRecipe> = {
             title,
@@ -30,7 +32,7 @@ export const createRecipe = async (req: Request, res: Response) => {
         const newRecipe = new Recipe(newRecipeData);
         const savedRecipe = await newRecipe.save();
         return res.status(201).json({ message: "Recipe created successfully", data: savedRecipe });
-        
+
     } catch (error) {
         console.error("Error during recipe creation:", error);
         return res.status(500).json({ message: "Error creating recipe" });
