@@ -1,6 +1,6 @@
-// controllers/userController.ts
 import { Request, Response } from 'express';
 import User from '../models/user';
+import Recipe from '../models/recipe';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -31,12 +31,11 @@ export const loginUser = async (req: Request, res: Response) => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            username: user.username,
             bio: user.bio,
             img: user.img,
             createdAt: user.createdAt,
             lastLogin: user.lastLogin,
-            updatedAt: user.updatedAt,
+            updatedAt: user.updatedAt
         };
 
         req.session.user = userSession;
@@ -74,10 +73,15 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
-        const user = await User.findById(id).select('-password');
+        const user = await User.findById(id).select('-password').populate({
+            path: 'recipes', 
+            model: Recipe, 
+        });
+
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+
         res.json(user);
     } catch (error) {
         console.error(error);

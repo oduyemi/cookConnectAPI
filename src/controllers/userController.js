@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserById = exports.getAllUsers = exports.getUserProfile = exports.loginUser = void 0;
 const user_1 = __importDefault(require("../models/user"));
+const recipe_1 = __importDefault(require("../models/recipe"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -36,12 +37,11 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            username: user.username,
             bio: user.bio,
             img: user.img,
             createdAt: user.createdAt,
             lastLogin: user.lastLogin,
-            updatedAt: user.updatedAt,
+            updatedAt: user.updatedAt
         };
         req.session.user = userSession;
         res.json({ token, user: userSession });
@@ -80,7 +80,10 @@ exports.getAllUsers = getAllUsers;
 const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const user = yield user_1.default.findById(id).select('-password');
+        const user = yield user_1.default.findById(id).select('-password').populate({
+            path: 'recipes',
+            model: recipe_1.default,
+        });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

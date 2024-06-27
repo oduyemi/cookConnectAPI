@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { IRecipe } from './recipe';
 
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
-  username: string;
   password: string;
   bio?: string;
   img?: string;
@@ -17,6 +17,7 @@ export interface IUser extends Document {
   resetToken?: string | null;
   resetExpires?: Date | null;
   updatedAt: Date;
+  recipes: IRecipe['_id'][];
 }
 
 const userSchema: Schema<IUser> = new Schema({
@@ -38,12 +39,6 @@ const userSchema: Schema<IUser> = new Schema({
       validator: (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
       message: "Invalid email format",
     },
-  },
-
-  username: {
-    type: String,
-    required: true,
-    unique: true,
   },
 
   password: {
@@ -100,6 +95,11 @@ const userSchema: Schema<IUser> = new Schema({
     type: Date,
     default: Date.now,
   },
+
+  recipes: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: 'Recipe' 
+  }]
   
 });
 

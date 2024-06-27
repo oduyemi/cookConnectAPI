@@ -37,7 +37,7 @@ const getCommentsByRecipeId = (req, res) => __awaiter(void 0, void 0, void 0, fu
     try {
         const { recipeId } = req.params;
         const comments = yield comment_1.default.find({ recipe: recipeId })
-            .populate('createdBy', '_id username')
+            .populate('createdBy', '_id author')
             .sort({ createdAt: -1 });
         res.json(comments);
     }

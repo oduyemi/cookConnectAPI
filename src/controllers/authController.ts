@@ -14,7 +14,6 @@ interface UserSession {
     firstName: string;
     lastName: string;
     email: string;
-    username: string;
     bio?: string;
     img?: string;
     createdAt?: Date;

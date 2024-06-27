@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import mongoose from "mongoose";
 import User, { IUser }  from '../models/user';
 
 

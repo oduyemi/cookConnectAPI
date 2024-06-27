@@ -28,7 +28,7 @@ export const getCommentsByRecipeId = async (req: Request, res: Response) => {
         const { recipeId } = req.params;
 
         const comments = await Comment.find({ recipe: recipeId })
-            .populate('createdBy', '_id username')
+            .populate('createdBy', '_id author')
             .sort({ createdAt: -1 });
 
         res.json(comments);

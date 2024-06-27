@@ -6,7 +6,6 @@ import { Request, Response, NextFunction } from "express";
 const isEmail = check("email").isEmail().withMessage("Must be a valid email");
 const isPassword = check("password").isLength({ min: 8 }).withMessage("Password must be at least 8 characters long");
 const isRequiredString = (field: string, message: string) => check(field).isString().withMessage(message).notEmpty().withMessage(`${field} is required`);
-const isPositiveInteger = (field: string, message: string) => check(field).isInt({ min: 1 }).withMessage(message);
 
 
 const loginValidationRules = () => [
@@ -20,7 +19,6 @@ const passwordResetValidationRules = () => [
 ];
 
 const userValidationRules = () => [
-    check("username").notEmpty().withMessage("Username is required"),
     isEmail,
     isPassword,
 ];

@@ -42,11 +42,6 @@ const userSchema = new mongoose_1.Schema({
             message: "Invalid email format",
         },
     },
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-    },
     password: {
         type: String,
         required: true,
@@ -90,6 +85,10 @@ const userSchema = new mongoose_1.Schema({
         type: Date,
         default: Date.now,
     },
+    recipes: [{
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: 'Recipe'
+        }]
 });
 userSchema.pre('save', function (next) {
     this.updatedAt = new Date();

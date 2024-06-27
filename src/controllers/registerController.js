@@ -40,8 +40,8 @@ const generateOTP = () => {
 };
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { firstName, lastName, email, username, password, confirmPassword } = req.body;
-        if (![firstName, lastName, email, username, password, confirmPassword].every(field => field)) {
+        const { firstName, lastName, email, password, confirmPassword } = req.body;
+        if (![firstName, lastName, email, password, confirmPassword].every(field => field)) {
             return res.status(400).json({ message: "All fields are required" });
         }
         if (password !== confirmPassword) {
@@ -51,10 +51,6 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (existingUser) {
             return res.status(400).json({ error: "Email already registered" });
         }
-        const existingUserByUsername = yield user_1.default.findOne({ username });
-        if (existingUserByUsername) {
-            return res.status(400).json({ message: "Username not available" });
-        }
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
         const otp = generateOTP();
         const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
@@ -62,7 +58,6 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             firstName,
             lastName,
             email,
-            username,
             password: hashedPassword,
             otp,
             otpExpires,
@@ -77,7 +72,6 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             firstName,
             lastName,
             email,
-            username,
             bio: "",
             img: "",
             createdAt: newUser.createdAt

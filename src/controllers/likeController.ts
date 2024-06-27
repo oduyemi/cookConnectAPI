@@ -1,5 +1,3 @@
-// controllers/likeController.ts
-
 import { Request, Response } from 'express';
 import Like from '../models/like';
 import Recipe from '../models/recipe';

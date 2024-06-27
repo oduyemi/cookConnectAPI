@@ -6,7 +6,6 @@ const express_validator_1 = require("express-validator");
 const isEmail = (0, express_validator_1.check)("email").isEmail().withMessage("Must be a valid email");
 const isPassword = (0, express_validator_1.check)("password").isLength({ min: 8 }).withMessage("Password must be at least 8 characters long");
 const isRequiredString = (field, message) => (0, express_validator_1.check)(field).isString().withMessage(message).notEmpty().withMessage(`${field} is required`);
-const isPositiveInteger = (field, message) => (0, express_validator_1.check)(field).isInt({ min: 1 }).withMessage(message);
 const loginValidationRules = () => [
     isEmail,
     isPassword,
@@ -18,7 +17,6 @@ const passwordResetValidationRules = () => [
 ];
 exports.passwordResetValidationRules = passwordResetValidationRules;
 const userValidationRules = () => [
-    (0, express_validator_1.check)("username").notEmpty().withMessage("Username is required"),
     isEmail,
     isPassword,
 ];

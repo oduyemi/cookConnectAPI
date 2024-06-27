@@ -33,8 +33,8 @@ const generateOTP = (): string => {
 
 const registerUser = async (req: Request, res: Response) => {
     try {
-        const { firstName, lastName, email, username, password, confirmPassword } = req.body;
-        if (![firstName, lastName, email, username, password, confirmPassword].every(field => field)) {
+        const { firstName, lastName, email, password, confirmPassword } = req.body;
+        if (![firstName, lastName, email, password, confirmPassword].every(field => field)) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -47,11 +47,6 @@ const registerUser = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "Email already registered" });
         }
 
-        const existingUserByUsername = await User.findOne({ username });
-        if (existingUserByUsername) {
-            return res.status(400).json({ message: "Username not available" });
-        }
-
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const otp = generateOTP();
@@ -61,7 +56,6 @@ const registerUser = async (req: Request, res: Response) => {
             firstName,
             lastName,
             email,
-            username,
             password: hashedPassword,
             otp,
             otpExpires,
@@ -82,7 +76,6 @@ const registerUser = async (req: Request, res: Response) => {
             firstName,
             lastName,
             email,
-            username,
             bio: "",
             img: "",
             createdAt: newUser.createdAt
