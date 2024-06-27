@@ -26,7 +26,7 @@ app.use(session({
     saveUninitialized: true
 }));
 const corsOptions = {
-    origin: ["http://localhost:3000"]
+    origin: ["https://www.cookconnect.vercel.app/", "https://cookconnect.vercel.app/"]
 };
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));

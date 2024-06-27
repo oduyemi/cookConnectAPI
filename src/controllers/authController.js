@@ -33,7 +33,7 @@ const transporter = nodemailer_1.default.createTransport({
     },
 });
 const passwordResetLimiter = (0, express_rate_limit_1.default)({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 * 60 * 1000,
     max: 5,
     message: "Too many password reset attempts, please try again later.",
 });
