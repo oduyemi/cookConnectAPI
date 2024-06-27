@@ -40,25 +40,25 @@ app.use(cors(corsOptions));
 
 
 // Routes
-app.use("/api/v1", authRoutes);
-app.use("/api/v1", registerRoutes);
-app.use('/api/v1', loginRoutes);
-app.use('/api/v1/otp', otpRoutes);
-app.use('/api/v1/', userRoutes);
-app.use('/api/v1/users/likes', likeRoutes);
-app.use('/api/v1/recipe', recipeRoutes);
-app.use('/api/v1/recipe/comments', userRoutes);
+app.use("/v1", authRoutes);
+app.use("/v1", registerRoutes);
+app.use('/v1', loginRoutes);
+app.use('/v1/otp', otpRoutes);
+app.use('/v1/', userRoutes);
+app.use('/v1/users/likes', likeRoutes);
+app.use('/v1/recipe', recipeRoutes);
+app.use('/v1/recipe/comments', userRoutes);
 
 
 // GET route for the API "/"
-app.get("/api/v1", (req: Request, res: Response) => {
+app.get("/v1", (req: Request, res: Response) => {
   res.json({ message: "CookConnect API" });
 });
 
 db.on("error", console.error.bind(console, "Mongodb Connection Error:"));
 
 // Proxy middleware
-app.use("/api/v1", createProxyMiddleware({
+app.use("/v1", createProxyMiddleware({
   target: "http://192.168.43.113:3000/",
   changeOrigin: true,
 }));
