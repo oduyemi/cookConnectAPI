@@ -13,30 +13,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyOTP = void 0;
+const temporaryUser_1 = __importDefault(require("../models/temporaryUser"));
 const user_1 = __importDefault(require("../models/user"));
 const verifyOTP = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, otp } = req.body;
-    const user = yield user_1.default.findOne({ email });
-    if (!user) {
-        return res.status(404).json({ message: "Email found" });
-    }
-    if (user.otp !== otp) {
-        return res.status(400).json({ message: "Invalid OTP" });
-    }
-    const currentDateTime = new Date();
-    if (!user.otpExpires || currentDateTime > user.otpExpires) {
-        return res.status(400).json({ message: "OTP has expired" });
-    }
-    user.emailVerified = true;
-    user.otp = null;
-    user.otpExpires = null;
     try {
-        yield user.save();
-        res.status(200).json({ message: "Email verified successfully" });
+        const { email, otp } = req.body;
+        console.log(`Received OTP verification request for email: ${email} and OTP: ${otp}`);
+        const tempUser = yield temporaryUser_1.default.findOne({ email });
+        if (!tempUser) {
+            console.log("Temporary user not found for email:", email);
+            return res.status(404).json({ message: "Invalid OTP or email." });
+        }
+        console.log("Temporary user found:", tempUser);
+        if (tempUser.otpExpires < new Date()) {
+            console.log("OTP has expired for email:", email);
+            yield temporaryUser_1.default.deleteOne({ email });
+            return res.status(400).json({ message: "OTP expired." });
+        }
+        if (tempUser.otp !== otp) {
+            console.log("Invalid OTP provided for email:", email);
+            return res.status(400).json({ message: "Invalid OTP." });
+        }
+        const newUser = new user_1.default({
+            firstName: tempUser.firstName,
+            lastName: tempUser.lastName,
+            email: tempUser.email,
+            password: tempUser.password,
+        });
+        yield newUser.save();
+        yield temporaryUser_1.default.deleteOne({ email });
+        console.log("Email verification successful for email:", email);
+        res.status(200).json({ message: "Email verification successful!" });
     }
     catch (error) {
-        console.error("Error updating user:", error);
-        res.status(500).json({ message: "An error occurred while verifying the email" });
+        console.error("Error during OTP verification:", error);
+        return res.status(500).json({ message: "Error verifying OTP", error: error.message });
     }
 });
 exports.verifyOTP = verifyOTP;

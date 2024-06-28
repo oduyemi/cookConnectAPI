@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resetPassword = exports.initiatePasswordReset = exports.userAuthMiddleware = void 0;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const crypto_1 = __importDefault(require("crypto"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -55,28 +54,6 @@ const userAuthMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.userAuthMiddleware = userAuthMiddleware;
-const protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            token = req.headers.authorization.split(' ')[1];
-            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-            const user = yield user_1.default.findById(decoded.id).select('-password');
-            if (!user) {
-                return res.status(401).json({ message: 'Unauthorized: User not found' });
-            }
-            req.user = user;
-            next();
-        }
-        catch (error) {
-            console.error('Token verification error:', error);
-            res.status(401).json({ message: 'Not authorized, token failed' });
-        }
-    }
-    else {
-        res.status(401).json({ message: 'Not authorized, no token' });
-    }
-});
 exports.initiatePasswordReset = [
     passwordResetLimiter,
     (req, res) => __awaiter(void 0, void 0, void 0, function* () {

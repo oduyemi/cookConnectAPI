@@ -13,21 +13,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerUser = void 0;
-const express_1 = __importDefault(require("express"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const crypto_1 = __importDefault(require("crypto"));
+const temporaryUser_1 = __importDefault(require("../models/temporaryUser"));
 const user_1 = __importDefault(require("../models/user"));
-const router = express_1.default.Router();
-require("dotenv").config();
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
+const JWT_SECRET = process.env.JWT_SECRET;
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://cookconnect.vercel.app/verify";
 if (!SMTP_USER || !SMTP_PASS) {
     throw new Error("SMTP_USER or SMTP_PASS is not defined. Check your .env file.");
 }
+if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET is not defined. Check your .env file.");
+}
 const transporter = nodemailer_1.default.createTransport({
-    host: "premium194.web-hosting.com",
+    host: "smtp.gmail.com",
     port: 465,
     secure: true,
     auth: {
@@ -36,7 +40,7 @@ const transporter = nodemailer_1.default.createTransport({
     },
 });
 const generateOTP = () => {
-    return crypto_1.default.randomInt(1000, 10000).toString();
+    return crypto_1.default.randomInt(100000, 1000000).toString(); // Generate 6-digit OTP
 };
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -49,12 +53,16 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
         const existingUser = yield user_1.default.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ error: "Email already registered" });
+            return res.status(400).json({ message: "Email already registered" });
+        }
+        const existingTempUser = yield temporaryUser_1.default.findOne({ email });
+        if (existingTempUser) {
+            yield temporaryUser_1.default.deleteOne({ email });
         }
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
         const otp = generateOTP();
         const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
-        const newUser = new user_1.default({
+        const tempUser = new temporaryUser_1.default({
             firstName,
             lastName,
             email,
@@ -62,22 +70,7 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             otp,
             otpExpires,
         });
-        yield newUser.save();
-        const token = jsonwebtoken_1.default.sign({
-            userId: newUser._id,
-            email: newUser.email
-        }, process.env.JWT_SECRET, { expiresIn: "30m" });
-        const userSession = {
-            userID: newUser._id,
-            firstName,
-            lastName,
-            email,
-            bio: "",
-            img: "",
-            createdAt: newUser.createdAt
-        };
-        req.session.user = userSession;
-        const frontendUrl = "http://localhost:3000";
+        yield tempUser.save();
         const mailOptions = {
             from: SMTP_USER,
             to: email,
@@ -87,20 +80,19 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 <h1>Verify Your Email Address</h1>
                 <p>Your OTP is: <strong>${otp}</strong>. This OTP will expire in 5 minutes.</p>
                 <p>Please enter this OTP on our website to verify your email.</p>
-                <a href="${frontendUrl}" style="display: inline-block; background: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; border-radius: 4px;">
+                <a href="${FRONTEND_URL}" style="display: inline-block; background: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; border-radius: 4px;">
                   Click Here to Verify
                 </a>
             `,
         };
         yield transporter.sendMail(mailOptions);
         res.status(201).json({
-            message: "Registration successful! OTP sent to email.",
-            token,
-            nextStep: "/next-login-page",
+            message: "Registration initiated! Please check your email to verify your account.",
         });
     }
     catch (error) {
-        return res.status(500).json({ message: "Error registering user" });
+        console.error("Error during registration process:", error);
+        return res.status(500).json({ message: "Error registering user", error: error.message });
     }
 });
 exports.registerUser = registerUser;

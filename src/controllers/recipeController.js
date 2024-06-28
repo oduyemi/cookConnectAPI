@@ -15,35 +15,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRecipe = exports.updateRecipe = exports.getRecipeById = exports.getAllRecipe = exports.createRecipe = void 0;
 const mongoose_1 = require("mongoose");
 const recipe_1 = __importDefault(require("../models/recipe"));
-const cloudinary_1 = require("cloudinary");
 const createRecipe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { title, desc, ingredients, instructions, author, img } = req.body;
-        if (![title, desc, ingredients, instructions, author, img].every(field => field)) {
-            return res.status(400).json({ message: "All fields are required" });
+        const { title, description, ingredients, instructions, author } = req.body;
+        let imgPath;
+        if (req.file) {
+            imgPath = req.file.path;
         }
-        const cloudinaryResponse = yield cloudinary_1.v2.uploader.upload(img, {
-            folder: "cookconnect/recipe-images/",
-            width: 300,
-            crop: "scale",
-            public_id: title.replace(/\s+/g, '_').toLowerCase()
-        });
-        const newRecipeData = {
+        else {
+            return res.status(400).json({ message: 'Image file is required.' });
+        }
+        const newRecipe = yield recipe_1.default.create({
             title,
-            desc,
+            description,
             ingredients,
             instructions,
             author,
-            img: cloudinaryResponse.secure_url,
-            createdAt: new Date(),
-        };
-        const newRecipe = new recipe_1.default(newRecipeData);
-        const savedRecipe = yield newRecipe.save();
-        return res.status(201).json({ message: "Recipe created successfully", data: savedRecipe });
+            image: imgPath
+        });
+        res.status(201).json({ recipe: newRecipe });
     }
     catch (error) {
-        console.error("Error during recipe creation:", error);
-        return res.status(500).json({ message: "Error creating recipe" });
+        console.error(error);
+        res.status(500).json({ message: 'Failed to create recipe.' });
     }
 });
 exports.createRecipe = createRecipe;

@@ -1,11 +1,10 @@
-import express, { Application, Request, Response } from "express";
+import express, { Application } from "express";
+import compression from "compression";
 import bodyParser from "body-parser";
-import connectMongo from 'connect-mongo';
-import mongoose from 'mongoose';
 import dotenv from "dotenv";
 import cors from "cors";
-import { createProxyMiddleware } from "http-proxy-middleware";
-import db from "./config";
+import session from 'express-session';
+import { db, store } from "./config";
 import authRoutes from "./routes/authRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import likeRoutes from "./routes/likeRoutes";
@@ -14,30 +13,34 @@ import registerRoutes from "./routes/registerRoutes";
 import userRoutes from './routes/userRoutes';
 import otpRoutes from './routes/otpRoutes';
 import recipeRoutes from "./routes/recipeRoutes";
-import { v2 as cloudinary } from "cloudinary";
+import AppError from "./utils/appError";
+import upload from "./middlewares/uploadMiddleware";
 
 
 dotenv.config();
 
 const app: Application = express();
 
-const session = require('express-session');
-
 app.use(session({
   secret: process.env.SECRET_KEY!,
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false,
+  store: store,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', 
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 // 1 hour
+  }
 }));
 
-
 const corsOptions = {
-  origin: ["https://www.cookconnect.vercel.app/", "https://cookconnect.vercel.app/"]
+  origin: ["http://localhost:3000", "https://cookconnect.vercel.app", "https://www.cookconnect.vercel.app"]
 };
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 
+app.use(cors(corsOptions));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use("/v1", authRoutes);
@@ -45,29 +48,36 @@ app.use("/v1", registerRoutes);
 app.use('/v1', loginRoutes);
 app.use('/v1/otp', otpRoutes);
 app.use('/v1/', userRoutes);
-app.use('/v1/users/likes', likeRoutes);
-app.use('/v1/recipe', recipeRoutes);
-app.use('/v1/recipe/comments', userRoutes);
+app.use('/v1/likes', likeRoutes);
+app.use('/v1/recipes', recipeRoutes);
+app.use('/v1/comments', commentRoutes);
 
-
-// GET route for the API "/"
-app.get("/v1", (req: Request, res: Response) => {
-  res.json({ message: "CookConnect API" });
+app.all("*", (req, res, next) => {
+  next(
+    new AppError(
+      `The route ${req.originalUrl} with the ${req.method} method does not exist on this server! 💨`,
+      404
+    )
+  );
 });
 
 db.on("error", console.error.bind(console, "Mongodb Connection Error:"));
 
-// Proxy middleware
-app.use("/v1", createProxyMiddleware({
-  target: "http://192.168.43.113:3000/",
-  changeOrigin: true,
-}));
 
-cloudinary.config({
-  secure: true,
+
+// cloudinary.config({
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+//   api_key: process.env.CLOUDINARY_API_KEY!,
+//   api_secret: process.env.CLOUDINARY_API_SECRET!,
+// });
+
+// console.log('Cloudinary configuration complete');
+
+// Multer middleware route for file upload
+app.post('/upload', upload.single('file'), (req, res) => {
+  res.json({ message: 'File uploaded successfully' });
 });
 
-console.log(cloudinary.config());
 
 const PORT: number | string = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -1,14 +1,14 @@
 import express from 'express';
-import { userAuthMiddleware } from '../controllers/authController';
+import { protect } from "../middlewares/authMiddleware";
 import { createRecipe, getAllRecipe, getRecipeById, updateRecipe, deleteRecipe } from '../controllers/recipeController';
+import upload from '../middlewares/uploadMiddleware';
 
 const router = express.Router();
 
-
-router.post('/recipes', userAuthMiddleware, createRecipe);
-router.get('/recipes', getAllRecipe);
-router.get('/recipes/:recipeId', getRecipeById);
-router.put('/recipes/:recipeId', userAuthMiddleware, updateRecipe);
-router.delete('/recipes/:recipeId', userAuthMiddleware, deleteRecipe);
+router.post('/', protect, upload.single('img'), createRecipe);
+router.get('/', getAllRecipe);
+router.get('/:recipeId', getRecipeById);
+router.put('/:recipeId', protect, upload.single('img'), updateRecipe);
+router.delete('/:recipeId', protect, deleteRecipe);
 
 export default router;

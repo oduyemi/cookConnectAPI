@@ -39,20 +39,25 @@ const protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
             token = req.headers.authorization.split(' ')[1];
+            console.log("Token received on server:", token); // Debugging: log the token
             const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-            const user = yield user_1.default.findById(decoded.id).select('-password');
+            console.log("Decoded token:", decoded); // Debugging: log the decoded token
+            const user = yield user_1.default.findById(decoded.userId).select('-password');
+            console.log("User retrieved:", user); // Debugging: log the user
             if (!user) {
+                console.log("User not found for token"); // Debugging: log if user not found
                 return res.status(401).json({ message: 'Unauthorized: User not found' });
             }
-            req.user = user.toJSON();
+            req.user = user;
             next();
         }
         catch (error) {
-            console.error('Token verification error:', error);
+            console.error('Token verification error:', error.message); // Log the error message
             res.status(401).json({ message: 'Not authorized, token failed' });
         }
     }
     else {
+        console.log("No token provided"); // Debugging: log if no token provided
         res.status(401).json({ message: 'Not authorized, no token' });
     }
 });

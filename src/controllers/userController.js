@@ -12,11 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserById = exports.getAllUsers = exports.getUserProfile = exports.loginUser = void 0;
+exports.getUserById = exports.getAllUsers = exports.getUserProfile = exports.loginUser = exports.getIndex = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const recipe_1 = __importDefault(require("../models/recipe"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const getIndex = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    res.json({ message: "CookConnect API" });
+});
+exports.getIndex = getIndex;
 const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     try {

@@ -24,65 +24,32 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const userSchema = new mongoose_1.Schema({
+const temporaryUserSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
-        required: true,
+        required: true
     },
     lastName: {
         type: String,
-        required: true,
+        required: true
     },
     email: {
         type: String,
-        unique: true,
         required: true,
-        validate: {
-            validator: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-            message: "Invalid email format",
-        },
+        unique: true
     },
     password: {
         type: String,
-        required: true,
-        validate: {
-            validator: (password) => /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[^\s]).{8,}$/.test(password),
-            message: "Password must be at least 8 characters long and contain at least one capital letter, one small letter, one digit, and one special character.",
-        },
+        required: true
     },
-    bio: {
+    otp: {
         type: String,
+        required: true
     },
-    img: {
-        type: String,
-    },
-    resetToken: {
-        type: mongoose_1.default.Schema.Types.Mixed,
-        default: null,
-    },
-    resetExpires: {
-        type: mongoose_1.default.Schema.Types.Mixed,
-        default: null,
-    },
-    createdAt: {
+    otpExpires: {
         type: Date,
-        default: Date.now,
-    },
-    lastLogin: {
-        type: Date,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
-    recipes: [{
-            type: mongoose_1.Schema.Types.ObjectId,
-            ref: 'Recipe'
-        }]
+        required: true
+    }
 });
-userSchema.pre('save', function (next) {
-    this.updatedAt = new Date();
-    next();
-});
-const User = mongoose_1.default.model("User", userSchema);
-exports.default = User;
+const TemporaryUser = mongoose_1.default.model("TemporaryUser", temporaryUserSchema);
+exports.default = TemporaryUser;

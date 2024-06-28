@@ -1,43 +1,38 @@
 import { Request, Response } from 'express';
 import { Types } from "mongoose";
 import Recipe, { IRecipe } from '../models/recipe';
-import { v2 as cloudinary } from 'cloudinary';
+import path from 'path';
+import fs from 'fs';
 
 
 export const createRecipe = async (req: Request, res: Response) => {
     try {
-        const { title, desc, ingredients, instructions, author, img } = req.body;
-        if (![title, desc, ingredients, instructions, author, img].every(field => field)) {
-            return res.status(400).json({ message: "All fields are required" });
+        const { title, description, ingredients, instructions, author } = req.body;
+        let imgPath: string | undefined;
+
+        if (req.file) {
+            imgPath = req.file.path;
+        } else {
+            return res.status(400).json({ message: 'Image file is required.' });
         }
 
-        const cloudinaryResponse = await cloudinary.uploader.upload(img, {
-            folder: "cookconnect/recipe-images/",
-            width: 300,
-            crop: "scale",
-            public_id: title.replace(/\s+/g, '_').toLowerCase()
-        });
-        
-
-        const newRecipeData: Partial<IRecipe> = {
+        const newRecipe = await Recipe.create({
             title,
-            desc,
+            description,
             ingredients,
             instructions,
             author,
-            img: cloudinaryResponse.secure_url,
-            createdAt: new Date(),
-        };
+            image: imgPath
+        });
 
-        const newRecipe = new Recipe(newRecipeData);
-        const savedRecipe = await newRecipe.save();
-        return res.status(201).json({ message: "Recipe created successfully", data: savedRecipe });
-
+        res.status(201).json({ recipe: newRecipe });
     } catch (error) {
-        console.error("Error during recipe creation:", error);
-        return res.status(500).json({ message: "Error creating recipe" });
+        console.error(error);
+        res.status(500).json({ message: 'Failed to create recipe.' });
     }
 };
+
+
 
 export const getAllRecipe = async (req: Request, res: Response) => {
     try {

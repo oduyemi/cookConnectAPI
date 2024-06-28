@@ -8,6 +8,7 @@ const userController_1 = require("../controllers/userController");
 const registerController_1 = require("../controllers/registerController");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = express_1.default.Router();
+router.get("/", userController_1.getIndex);
 router.post('/register', registerController_1.registerUser);
 router.post('/login', userController_1.loginUser);
 router.get('/profile', authMiddleware_1.protect, userController_1.getUserProfile);
